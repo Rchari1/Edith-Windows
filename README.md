@@ -2,22 +2,56 @@
   <img src="assets/icon.png" alt="Edith" width="132" height="132">
 </p>
 
-<h1 align="center">Edith Second Brain</h1>
+<h1 align="center">Edith Second Brain for Windows</h1>
 
 <p align="center"><strong>A second brain for AI.</strong></p>
 
 <p align="center">
   <a href="https://edithapp.ai">edithapp.ai</a> &middot;
-  <a href="https://github.com/Rchari1/Edith-SecondBrain/releases/latest">Download for macOS</a>
+  <a href="https://github.com/Rchari1/Edith-SecondBrain">the macOS version</a>
 </p>
 
-Edith is a local, plain-Markdown knowledge base that Claude can read from and write to. Ask Claude to review your past sessions and it distils them into linked notes itself - no API key, no account, no inference of its own. 
+> **Experimental, and untested by a human.** This is the Windows port of
+> [Edith Second Brain](https://github.com/Rchari1/Edith-SecondBrain). CI installs it,
+> runs the full suite and builds the installer on Windows, but nobody has yet opened
+> the app on a Windows machine and told us it looks right. If you try it, please open
+> an issue either way.
+>
+> The macOS version is the one that is signed, notarised and in use.
 
+## How this repo relates to the macOS one
+
+Same codebase, with the platform differences kept to as few files as possible:
+
+| What | Why |
+|---|---|
+| The Claude Code hook puts its marker in the URL | `cmd` has no `#` comment and no `true` |
+| The status line is PowerShell, not Python | Windows ships PowerShell; batch cannot parse the JSON Claude sends |
+| Edith's drawn window buttons are hidden | Windows draws its own title bar, so ours would be a second set |
+| A `win` build target and an `.ico` | electron-builder needs both to make an installer |
+| Two test assertions skip | They check the Unix executable bit, which NTFS does not have |
+
+Fixes from the macOS repo come in with:
+
+```bash
+git remote add upstream https://github.com/Rchari1/Edith-SecondBrain.git   # once
+git fetch upstream && git merge upstream/main
 ```
-Claude session ──MCP──▶      Edith.app      ──▶  the graph lights up
-                              │
-                              └── vault/notes/*.md
+
+## Install
+
+Download the installer from [Releases](https://github.com/Rchari1/Edith-Windows/releases), or build it:
+
+```bash
+git clone https://github.com/Rchari1/Edith-Windows.git
+cd Edith-Windows
+npm install
+npm run dist:win
 ```
+
+The installer is unsigned, so Windows will warn you before running it. You need
+[Claude Code](https://claude.com/claude-code) and Node 22.12 or newer to build.
+
 
 ## What it does
 

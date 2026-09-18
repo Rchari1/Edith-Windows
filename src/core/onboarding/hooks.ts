@@ -33,7 +33,14 @@ function settingsPath(home: string): string {
  * it a failing hook would surface an error at the top of every session. The
  * marker comment is how we find our own entry again to update or remove it.
  */
-export function hookCommand(contextUrl: string): string {
+export function hookCommand(contextUrl: string, platform = process.platform): string {
+  // Windows runs hooks through cmd, which has neither `#` comments nor `true`.
+  // The marker rides in the query string instead: any shell passes it through
+  // untouched, the server ignores unknown params, and removal still finds us.
+  if (platform === 'win32') {
+    const sep = contextUrl.includes('?') ? '&' : '?';
+    return `curl -s --max-time 2 "${contextUrl}${sep}hook=${HOOK_MARKER}"`;
+  }
   return `curl -s --max-time 2 ${contextUrl} || true # ${HOOK_MARKER}`;
 }
 

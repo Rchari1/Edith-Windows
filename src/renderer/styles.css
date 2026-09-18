@@ -671,6 +671,9 @@ button.danger:hover { border-color: var(--bad); color: var(--bad); }
 /* The wordmark stands where the set word used to, at the same optical size. */
 .stage-logo { display: block; height: calc(var(--fs-title) * 0.82); width: auto; }
 
+/* Where the OS draws its own window buttons, ours would be a duplicate set. */
+body.native-chrome #lights { display: none; }
+
 
 .stage-tagline {
   font-size: var(--fs-small);

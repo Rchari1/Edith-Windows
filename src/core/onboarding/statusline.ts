@@ -15,9 +15,22 @@ function settingsPath(home: string): string {
   return path.join(home, '.claude', 'settings.json');
 }
 
-/** Where the script lives once installed. Stable across app moves and upgrades. */
-export function scriptPath(home: string): string {
-  return path.join(home, '.claude', 'edith-status');
+/**
+ * Where the script lives once installed. Stable across app moves and upgrades.
+ *
+ * Windows gets the PowerShell port: it ships with the OS and parses the JSON
+ * Claude sends, which batch cannot.
+ */
+export function scriptPath(home: string, platform = process.platform): string {
+  const name = platform === 'win32' ? 'edith-status.ps1' : 'edith-status';
+  return path.join(home, '.claude', name);
+}
+
+/** What goes in settings.json. Windows needs an interpreter in front of it. */
+export function statusLineCommand(target: string, platform = process.platform): string {
+  return platform === 'win32'
+    ? `powershell -NoProfile -ExecutionPolicy Bypass -File "${target}"`
+    : target;
 }
 
 async function readJson(file: string): Promise<Record<string, unknown>> {
@@ -72,9 +85,10 @@ export async function installStatusLine(
     const target = scriptPath(home);
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.copyFile(sourceScript, target);
-    await fs.chmod(target, 0o755);
+    // NTFS has no executable bit, and chmod there is a no-op at best.
+    if (process.platform !== 'win32') await fs.chmod(target, 0o755);
 
-    const desired = { type: 'command', command: target, padding: 2 };
+    const desired = { type: 'command', command: statusLineCommand(target), padding: 2 };
     if (existing && JSON.stringify(existing) === JSON.stringify(desired)) {
       return { status: 'already-current', configPath: file };
     }

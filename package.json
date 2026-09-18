@@ -14,7 +14,8 @@
     "start": "env -u ELECTRON_RUN_AS_NODE electron-vite preview",
     "dist": "electron-vite build && electron-builder",
     "release:mac": "electron-vite build && env APPLE_KEYCHAIN_PROFILE=edith-notary electron-builder --mac --publish never",
-    "icon": "env -u ELECTRON_RUN_AS_NODE electron scripts/render-icon.cjs && iconutil -c icns assets/icon.iconset -o assets/icon.icns"
+    "icon": "env -u ELECTRON_RUN_AS_NODE electron scripts/render-icon.cjs && iconutil -c icns assets/icon.iconset -o assets/icon.icns",
+    "dist:win": "electron-vite build && electron-builder --win"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
@@ -40,7 +41,7 @@
   "build": {
     "appId": "com.rchari.edith",
     "productName": "Edith",
-    "copyright": "Copyright © 2026 Raghav Chari and Kate Bonner",
+    "copyright": "Copyright \u00a9 2026 Raghav Chari and Kate Bonner",
     "files": [
       "out/**/*",
       "assets/icon.png",
@@ -62,6 +63,24 @@
     },
     "directories": {
       "output": "release"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName}-${version}-Windows-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
     }
   },
   "engines": {

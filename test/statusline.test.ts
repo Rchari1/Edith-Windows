@@ -31,7 +31,7 @@ describe('status line installation', () => {
     expect(fs.existsSync(scriptPath(home))).toBe(true);
   });
 
-  it('makes the installed script executable', async () => {
+  it.skipIf(process.platform === 'win32')('makes the installed script executable', async () => {
     await installStatusLine(source, home);
     expect(fs.statSync(scriptPath(home)).mode & 0o111).toBeGreaterThan(0);
   });

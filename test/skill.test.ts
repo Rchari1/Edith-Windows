@@ -24,7 +24,7 @@ describe('/edith skill installation', () => {
     expect(fs.existsSync(path.join(r.dir, 'status'))).toBe(true);
   });
 
-  it('makes the status script executable', async () => {
+  it.skipIf(process.platform === 'win32')('makes the status script executable', async () => {
     const r = await installSkill(source, home);
     expect(fs.statSync(path.join(r.dir, 'status')).mode & 0o111).toBeGreaterThan(0);
   });

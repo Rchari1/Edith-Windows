@@ -138,6 +138,7 @@ declare global {
       windowZoom(): Promise<void>;
       windowFullscreen(): Promise<boolean>;
       onWindowFullscreen(cb: (on: boolean) => void): () => void;
+      platform: string;
       miniState(): Promise<MiniState | null>;
       miniEnter(): Promise<void>;
       miniShape(shape: 'rail' | 'square'): Promise<void>;
@@ -1190,6 +1191,11 @@ function paintMini(s: MiniState | null): void {
 
 // Minimizing is what turns the window into the panel, so the button just minimizes.
 /* ---------------- window lights ---------------- */
+
+// Only macOS lets us hide the real traffic lights and draw our own. Windows and
+// Linux keep their title bar, so ours would be a second, redundant set.
+if (window.brain.platform !== 'darwin') document.body.classList.add('native-chrome');
+
 
 // The three discs at the top left are the window's own controls, drawn here
 // so that the green one can carry a menu of the window's shapes. See .lights.

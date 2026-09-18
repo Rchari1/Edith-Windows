@@ -5,41 +5,55 @@ on:
     branches: [main]
   pull_request:
 
-# A newer push to the same branch makes the older run irrelevant.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  check:
-    # Edith ships for macOS, and parts of the core read macOS paths, so the
-    # checks run on the platform it is built for.
-    runs-on: macos-latest
-    timeout-minutes: 25
+  # The platform this fork exists for. windows-2022, not windows-latest:
+  # latest is Server 2025, which ships no Visual Studio, and npm compiles any
+  # package carrying a binding.gyp whether or not it ships a prebuilt binary.
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
+      - run: npm ci
+      - name: Build native modules for Electron
+        run: npx electron-builder install-app-deps
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Package the installer
+        run: npx electron-builder --win --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edith-windows-installer
+          path: release/*.exe
+          if-no-files-found: error
+          retention-days: 30
 
-      # The native SQLite module compiles from source here, and the node-gyp it
-      # uses still imports Python's distutils, which Python 3.12 removed. The
-      # runners ship a newer Python, so pin one that still has it.
+  # Kept so a change here, or a merge from the macOS repo, cannot quietly break
+  # that platform. Python 3.11 because the native module's build tooling still
+  # imports distutils, which 3.12 removed.
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - run: npm ci
-
-      # The tests run inside Electron's own copy of Node, so the native SQLite
-      # module has to be built against Electron rather than against Node.
-      - name: Build native modules for Electron
-        run: npx electron-builder install-app-deps
-
+      - run: npx electron-builder install-app-deps
       - run: npm run typecheck
-
       - run: npm test
-
       - run: npm run build

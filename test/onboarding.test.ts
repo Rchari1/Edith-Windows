@@ -2,7 +2,37 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { registerAll, unregisterAll, detectTargets, SERVER_KEY, LEGACY_SERVER_KEYS } from '@core/onboarding/register.js';
+import { hookCommand, HOOK_MARKER } from '@core/onboarding/hooks.js';
+import { statusLineCommand, scriptPath, STATUSLINE_MARKER } from '@core/onboarding/statusline.js';
 import { tmpDir, rm } from './helpers.js';
+
+describe('the Windows shell', () => {
+  it('keeps the hook marker out of shell syntax cmd cannot parse', () => {
+    const win = hookCommand('http://127.0.0.1:4319/context', 'win32');
+    expect(win).not.toContain('#');
+    expect(win).not.toContain('|| true');
+    // still recognisable as ours, which is how removal finds it
+    expect(win).toContain(HOOK_MARKER);
+  });
+
+  it('keeps the macOS hook exactly as it was', () => {
+    expect(hookCommand('http://127.0.0.1:4319/context', 'darwin')).toBe(
+      `curl -s --max-time 2 http://127.0.0.1:4319/context || true # ${HOOK_MARKER}`
+    );
+  });
+
+  it('runs the status line through PowerShell on Windows, bare on macOS', () => {
+    const target = 'C:\\Users\\u\\.claude\\edith-status.ps1';
+    expect(statusLineCommand(target, 'win32')).toContain('powershell -NoProfile');
+    expect(statusLineCommand(target, 'win32')).toContain(STATUSLINE_MARKER);
+    expect(statusLineCommand('/Users/u/.claude/edith-status', 'darwin')).toBe('/Users/u/.claude/edith-status');
+  });
+
+  it('names the script per platform', () => {
+    expect(scriptPath('/home/u', 'win32').endsWith('edith-status.ps1')).toBe(true);
+    expect(scriptPath('/home/u', 'darwin').endsWith('edith-status')).toBe(true);
+  });
+});
 
 describe('MCP registration', () => {
   let home: string;

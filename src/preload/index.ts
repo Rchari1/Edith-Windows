@@ -2,6 +2,8 @@ import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 
 /** The renderer's entire view of the main process. Nothing else crosses the bridge. */
 const api = {
+  /** Which window chrome to draw: only macOS hides its own title bar for us. */
+  platform: process.platform,
   status: () => ipcRenderer.invoke('brain:status'),
   graph: () => ipcRenderer.invoke('brain:graph'),
   settings: () => ipcRenderer.invoke('brain:settings'),
