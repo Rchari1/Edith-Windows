@@ -81,7 +81,8 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true
-    }
+    },
+    "npmRebuild": false
   },
   "engines": {
     "node": ">=22.12"

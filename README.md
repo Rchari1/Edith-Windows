@@ -28,10 +28,8 @@ The release notes list its SHA-256 if you want to check it.
 
 ### Or build it yourself
 
-You need [Node.js](https://nodejs.org) 22.12 or newer **and a C++ compiler**: install
-[Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) with the
-"Desktop development with C++" workload. The database module compiles during install, and without it
-you get `Could not find any Visual Studio installation to use`.
+You need [Node.js](https://nodejs.org) 22.12 or newer. No compiler: the database module
+ships an ABI-stable binary for Windows, so nothing is built from source.
 
 ```bash
 git clone https://github.com/Rchari1/Edith-Windows.git

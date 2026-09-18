@@ -17,29 +17,14 @@ jobs:
   # package carrying a binding.gyp whether or not it ships a prebuilt binary.
   windows:
     runs-on: windows-2022
-    # The native rebuild compiles SQLite from source here, which is slow on
-    # Windows even when it works.
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      # The native module compiles here, and node-gyp's build step still wants
-      # distutils, which Python 3.12 removed. Belt and braces with the node-gyp
-      # override in package.json.
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       - run: npm ci
-      # Prefer a published binary for the app's runtime over compiling SQLite
-      # from source, which is where this job was spending twenty-five minutes.
-      - name: Build native modules for Electron
-        run: npx electron-builder install-app-deps
-        env:
-          npm_config_build_from_source: 'false'
-          npm_config_prefer_offline: 'true'
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
