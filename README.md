@@ -40,7 +40,21 @@ git fetch upstream && git merge upstream/main
 
 ## Install
 
-Download the installer from [Releases](https://github.com/Rchari1/Edith-Windows/releases), or build it:
+**[Download the installer](https://github.com/Rchari1/Edith-Windows/releases/latest)**, built on
+Windows by CI. You also need [Claude Code](https://claude.com/claude-code), in the terminal or the
+VS Code extension.
+
+**Windows will stop you the first time.** You get a blue screen saying *"Windows protected your PC"*.
+Click **More info**, then **Run anyway**. That happens because the installer carries no code signing
+certificate - it costs a few hundred dollars a year - not because anything is wrong with the file.
+The release notes list its SHA-256 if you want to check it.
+
+### Or build it yourself
+
+You need [Node.js](https://nodejs.org) 22.12 or newer **and a C++ compiler**: install
+[Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) with the
+"Desktop development with C++" workload. The database module compiles during install, and without it
+you get `Could not find any Visual Studio installation to use`.
 
 ```bash
 git clone https://github.com/Rchari1/Edith-Windows.git
@@ -49,8 +63,7 @@ npm install
 npm run dist:win
 ```
 
-The installer is unsigned, so Windows will warn you before running it. You need
-[Claude Code](https://claude.com/claude-code) and Node 22.12 or newer to build.
+The installer lands in `release/`.
 
 
 ## What it does
@@ -63,24 +76,6 @@ The installer is unsigned, so Windows will warn you before running it. You need
 - **Takes your own content too.** **Add content** imports `.md`, `.markdown`, `.txt`, and `.mdx` files, or anything you paste. Files keep their existing frontmatter, so importing a Markdown vault preserves ids and links instead of duplicating notes. Import as written, or distil into concepts.
 - **Plain Markdown.** Files on disk are the source of truth. Edit them in any editor. Delete the index and it rebuilds.
 
-## Install
-
-Edith runs on macOS. You need:
-
-- [Node.js](https://nodejs.org) 22.12 or newer
-- [Claude Code](https://claude.com/claude-code), in the terminal or the VS Code extension
-
-There is no signed download yet, so for now you build Edith yourself. It takes a few minutes, and an app you build on your own Mac opens without security warnings.
-
-```bash
-git clone https://github.com/Rchari1/Edith.git
-cd Edith
-npm install
-npm run dist
-```
-
-Open the `.dmg` that lands in `release/`, drag **Edith** into Applications, and open it from there. Restart any Claude Code sessions that were already running.
-
 ### What happens on first launch
 
 Edith starts its brain server on `127.0.0.1:4319` and connects itself to Claude. There is no account and no API key: ask Claude to *"review my recent sessions and save anything worth keeping"* and it fills the brain itself.
@@ -89,38 +84,32 @@ Outside its own folder, Edith adds:
 
 | What | Where |
 |---|---|
-| Its server entry, so Claude can reach the brain | `~/.claude.json`, plus Claude Desktop's config if you have it |
-| A session-start hook that tells Claude the brain exists | `~/.claude/settings.json` |
-| The `/edith` command | `~/.claude/skills/edith` |
-| A handful of starter skills | `~/.claude/skills/`, managed from the Skills panel |
+| Its server entry, so Claude can reach the brain | `%USERPROFILE%\.claude.json`, plus `%APPDATA%\Claude\claude_desktop_config.json` if you have Claude Desktop |
+| A session-start hook that tells Claude the brain exists | `%USERPROFILE%\.claude\settings.json` |
+| The `/edith` command | `%USERPROFILE%\.claude\skills\edith` |
+| A handful of starter skills | `%USERPROFILE%\.claude\skills\`, managed from the Skills panel |
 
-Your notes are plain Markdown in `~/Library/Application Support/Edith/vault`.
+Your notes are plain Markdown in `%APPDATA%\Edith\vault`.
 
 ### Updating
 
-```bash
-cd Edith
-git pull
-npm install
-npm run dist
-```
-
-Quit Edith, then drag the new build into Applications to replace the old one.
+Quit Edith, then run the newer installer over the top. Your notes and settings stay where they are.
 
 ### Troubleshooting
 
-- **Edith quits the moment it opens.** If you launched it from a VS Code terminal, open it from Applications or the Dock instead - VS Code's terminal sets an environment variable that stops the app from starting.
+- **Edith quits the moment it opens.** If you launched it from a VS Code terminal, open it from the Start menu instead - VS Code's terminal sets an environment variable that stops the app from starting.
+- **The window has two sets of buttons, or none.** Report it with a screenshot: nobody has confirmed the window chrome on a real Windows machine yet.
 - **Claude never uses the brain.** Restart Claude Code after Edith's first launch, then open **Connection** in Edith and check that the session primer says installed.
 
 ### Uninstalling
 
-Quit Edith and delete it from Applications. Then remove what it added: the `edith` entry under `mcpServers` in `~/.claude.json`, the hook in `~/.claude/settings.json` whose command ends in `# edith:session-context`, the `~/.claude/skills/edith` folder, and any starter skills you no longer want. Your notes stay in `~/Library/Application Support/Edith` until you delete that folder too.
+Uninstall Edith from **Settings > Apps > Installed apps**. Then remove what it added: the `edith` entry under `mcpServers` in `%USERPROFILE%\.claude.json`, the hook in `%USERPROFILE%\.claude\settings.json` whose command contains `edith:session-context`, the `%USERPROFILE%\.claude\skills\edith` folder, and any starter skills you no longer want. Your notes stay in `%APPDATA%\Edith` until you delete that folder too.
 
 ## How it works
 
 | Stage | What happens |
 |---|---|
-| **Watch** | `chokidar` on `~/.claude/projects`, waiting for a session to go quiet |
+| **Watch** | `chokidar` on `%USERPROFILE%\.claude\projects`, waiting for a session to go quiet |
 | **Parse** | JSONL to a canonical `Session`, following `leafUuid` to skip abandoned branches |
 | **Store** | Markdown + YAML frontmatter, indexed in SQLite FTS5 |
 | **Serve** | In-process MCP server over local HTTP |
@@ -190,10 +179,11 @@ Every note records the sessions it came from. That provenance is written from da
 
 ```bash
 npm run dev        # run the app with hot reload
-npm test           # 65 tests
+npm test           # 239 tests
 npm run typecheck  # tsc --noEmit
 npm run build      # bundle main, preload, renderer
-npm run icon       # regenerate the app icon from assets/logo.svg
+npm run dist:win   # build the Windows installer into release/
+npm run icon       # rebuild the macOS icon set; assets/icon.ico is built from assets/icon.png
 ```
 
 Tests cover path classification, fork resolution, malformed-line tolerance, vault merge semantics, config-write safety, a live MCP client over HTTP, and the full pipeline end to end with the API call mocked.
