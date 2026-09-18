@@ -38,22 +38,19 @@ jobs:
           retention-days: 30
 
   # Kept so a change here, or a merge from the macOS repo, cannot quietly break
-  # that platform. Python 3.11 because the native module's build tooling still
-  # imports distutils, which 3.12 removed.
+  # that platform. No native rebuild and no Python for the same reason as the
+  # Windows job: the database module is N-API, so its shipped binary loads as
+  # it is. That step used to sit here for twenty-five minutes and then time out.
   macos:
     runs-on: macos-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       - run: npm ci
-      - run: npx electron-builder install-app-deps
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
