@@ -11,32 +11,9 @@
   <a href="https://github.com/Rchari1/Edith-SecondBrain">the macOS version</a>
 </p>
 
-> **Experimental, and untested by a human.** This is the Windows port of
-> [Edith Second Brain](https://github.com/Rchari1/Edith-SecondBrain). CI installs it,
-> runs the full suite and builds the installer on Windows, but nobody has yet opened
-> the app on a Windows machine and told us it looks right. If you try it, please open
-> an issue either way.
->
-> The macOS version is the one that is signed, notarised and in use.
-
-## How this repo relates to the macOS one
-
-Same codebase, with the platform differences kept to as few files as possible:
-
-| What | Why |
-|---|---|
-| The Claude Code hook puts its marker in the URL | `cmd` has no `#` comment and no `true` |
-| The status line is PowerShell, not Python | Windows ships PowerShell; batch cannot parse the JSON Claude sends |
-| Edith's drawn window buttons are hidden | Windows draws its own title bar, so ours would be a second set |
-| A `win` build target and an `.ico` | electron-builder needs both to make an installer |
-| Two test assertions skip | They check the Unix executable bit, which NTFS does not have |
-
-Fixes from the macOS repo come in with:
-
-```bash
-git remote add upstream https://github.com/Rchari1/Edith-SecondBrain.git   # once
-git fetch upstream && git merge upstream/main
-```
+The Windows build of [Edith Second Brain](https://github.com/Rchari1/Edith-SecondBrain).
+Every change is installed, tested and packaged on Windows by CI. Found something off?
+[Open an issue](https://github.com/Rchari1/Edith-Windows/issues).
 
 ## Install
 
@@ -98,7 +75,7 @@ Quit Edith, then run the newer installer over the top. Your notes and settings s
 ### Troubleshooting
 
 - **Edith quits the moment it opens.** If you launched it from a VS Code terminal, open it from the Start menu instead - VS Code's terminal sets an environment variable that stops the app from starting.
-- **The window has two sets of buttons, or none.** Report it with a screenshot: nobody has confirmed the window chrome on a real Windows machine yet.
+- **The window buttons look wrong.** Open an issue with a screenshot and your Windows version.
 - **Claude never uses the brain.** Restart Claude Code after Edith's first launch, then open **Connection** in Edith and check that the session primer says installed.
 
 ### Uninstalling
@@ -187,6 +164,25 @@ npm run icon       # rebuild the macOS icon set; assets/icon.ico is built from a
 ```
 
 Tests cover path classification, fork resolution, malformed-line tolerance, vault merge semantics, config-write safety, a live MCP client over HTTP, and the full pipeline end to end with the API call mocked.
+
+## Keeping up with the macOS repo
+
+Same codebase, with the platform differences kept to as few files as possible:
+
+| What | Why |
+|---|---|
+| The Claude Code hook puts its marker in the URL | `cmd` has no `#` comment and no `true` |
+| The status line is PowerShell, not Python | Windows ships PowerShell; batch cannot parse the JSON Claude sends |
+| Edith's drawn window buttons are hidden | Windows draws its own title bar, so ours would be a second set |
+| A `win` build target and an `.ico` | electron-builder needs both to make an installer |
+| Two test assertions skip | They check the Unix executable bit, which NTFS does not have |
+
+Fixes from the macOS repo come in with:
+
+```bash
+git remote add upstream https://github.com/Rchari1/Edith-SecondBrain.git   # once
+git fetch upstream && git merge upstream/main
+```
 
 ## Not in v1
 

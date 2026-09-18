@@ -7,7 +7,9 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Supersede a pull request's older runs, but never a push to main: those
+  # builds produce the installer, and cancelling one throws the artifact away.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # The platform this fork exists for. windows-2022, not windows-latest:
