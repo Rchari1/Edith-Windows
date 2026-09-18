@@ -11,6 +11,11 @@
   <a href="https://github.com/Rchari1/Edith-SecondBrain">the macOS version</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/Rchari1/Edith-Windows/actions/workflows/ci.yml"><img src="https://github.com/Rchari1/Edith-Windows/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/Rchari1/Edith-Windows/releases/latest"><img src="https://img.shields.io/github/v/release/Rchari1/Edith-Windows?label=download" alt="Latest release"></a>
+</p>
+
 The Windows build of [Edith Second Brain](https://github.com/Rchari1/Edith-SecondBrain).
 Every change is installed, tested and packaged on Windows by CI. Found something off?
 [Open an issue](https://github.com/Rchari1/Edith-Windows/issues).
