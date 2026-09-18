@@ -22,6 +22,12 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      # The native module compiles here, and node-gyp's build step still wants
+      # distutils, which Python 3.12 removed. Belt and braces with the node-gyp
+      # override in package.json.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - run: npm ci
       - name: Build native modules for Electron
         run: npx electron-builder install-app-deps
